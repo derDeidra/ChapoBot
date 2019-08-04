@@ -47,25 +47,7 @@ class PurityBot(object):
         self._purity_cache[user.name] = counts
         return counts
 
-    def stream(self, subreddit: str, only_on_command: bool) -> None:
-        """
-        Main run method for the bot, listens to a stream of posts coming from the given subreddit.  Replies to users
-        whose bias passes the impurity threshold.
-        :param subreddit: the subreddit to scan
-        :param only_on_command: whether or not to only respond to comments when asked to via !puritytest
-        """
-        print(f"Beginning purity scan on {subreddit}")
-        subreddit = self._reddit.subreddit(subreddit)
-        for comment in subreddit.stream.comments():
-            if only_on_command and self._bot_command in comment.body:
-                if comment.is_root:
-                    self.process_entry(comment.submission, force_reply=True)
-                else:
-                    self.process_entry(self._reddit.comment(id=comment.parent_id), force_reply=True)
-            else:
-                self.process_entry(comment, force_reply=False)
-
-    def process_entry(self, entry: Union[Comment, Submission], force_reply: bool) -> None:
+    def _process_entry(self, entry: Union[Comment, Submission], force_reply: bool) -> None:
         """
         Process either a comment o
         :param entry: the entry to process
@@ -87,6 +69,25 @@ class PurityBot(object):
             else:
                 sub_name, bias = determine_bias(num_impure_posts)
             self._db.insert_new_record(entry.id, entry.author.name, bias > self._purity_threshold)
+
+    def stream(self, subreddit: str, only_on_command: bool) -> None:
+        """
+        Main run method for the bot, listens to a stream of posts coming from the given subreddit.  Replies to users
+        whose bias passes the impurity threshold.
+        :param subreddit: the subreddit to scan
+        :param only_on_command: whether or not to only respond to comments when asked to via !puritytest
+        """
+        print(f"Beginning purity scan on {subreddit}")
+        subreddit = self._reddit.subreddit(subreddit)
+        for comment in subreddit.stream.comments():
+            if only_on_command:
+                if self._bot_command in comment.body:
+                    if comment.is_root:
+                        self._process_entry(comment.submission, force_reply=True)
+                    else:
+                        self._process_entry(self._reddit.comment(id=comment.parent_id), force_reply=True)
+            else:
+                self._process_entry(comment, force_reply=False)
 
 
 def determine_bias(purity_dict: Dict[str, int]) -> Tuple[str, int]:
@@ -136,4 +137,7 @@ if __name__ == "__main__":
         impure_subs=purity_bot_cfg['ImpureSubDisplayName'].split(','),
         bot_command=purity_bot_cfg['BotCommand']
     )
-    bot.stream(purity_bot_cfg['SubredditToScan'], purity_bot_cfg.getboolean('OnlyOnCommand'))
+    bot.stream(
+        subreddit=purity_bot_cfg['SubredditToScan'],
+        only_on_command=purity_bot_cfg.getboolean('OnlyOnCommand')
+    )
