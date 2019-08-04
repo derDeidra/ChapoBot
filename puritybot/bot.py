@@ -50,7 +50,7 @@ class PurityBot(object):
         whose bias passes the impurity threshold.
         :param subreddit: the subreddit to scan
         """
-        print(f"Beginning Chapo scan on {subreddit}")
+        print(f"Beginning purity scan on {subreddit}")
         subreddit = self._reddit.subreddit(subreddit)
         for comment in subreddit.stream.comments():
             print(f'Processing comment {comment.id} from {comment.author.name}')
