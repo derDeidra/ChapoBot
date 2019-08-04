@@ -62,12 +62,12 @@ class PurityBot(object):
                     sub_name, bias = determine_bias(num_impure_posts)
                     is_impure = bias > self._purity_threshold
                     if is_impure:
-                        print(
-                            f"{comment.author.name} failed purity test with {bias}/{self._post_lookback} recent {sub_name} posts")
-                        warning_message = f"**Warning** it has been detected that this account may be a {sub_name} poster. Out " \
-                                          f"of {comment.author.name}'s last {self._post_lookback} posts, {bias} of them are on {sub_name}"
-                        print(warning_message)
-                        # comment.reply(warning_message)
+                        print(f"{comment.author.name} failed purity test with {bias}/{self._post_lookback} recent {sub_name} posts")
+                        warning_message = \
+                            f'''**Warning** it has been detected that this account may be a {sub_name} poster. Out of {comment.author.name}'s last {self._post_lookback} posts, {bias} of them are on {sub_name}
+                                Bot src available [here](https://github.com/derDeidra/PurityBot)
+                             '''
+                        comment.reply(warning_message)
                 else:
                     sub_name, bias = determine_bias(num_impure_posts)
                 self._db.insert_new_record(comment.id, comment.author.name, bias > self._purity_threshold)
