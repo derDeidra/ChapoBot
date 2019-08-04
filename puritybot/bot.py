@@ -65,7 +65,7 @@ class PurityBot(object):
                         print(f"{comment.author.name} failed purity test with {bias}/{self._post_lookback} recent {sub_name} posts")
                         warning_message = \
                             f'''**Warning** it has been detected that this account may be a {sub_name} poster. Out of {comment.author.name}'s last {self._post_lookback} posts, {bias} of them are on {sub_name}
-                                Bot src available [here](https://github.com/derDeidra/PurityBot)
+                                \n\nBot src available [here](https://github.com/derDeidra/PurityBot)
                              '''
                         comment.reply(warning_message)
                 else:
